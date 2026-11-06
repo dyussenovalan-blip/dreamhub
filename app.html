@@ -1,0 +1,980 @@
+<title>DreamHub</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-column phone app — sticky top bar, scrolling view, fixed tab bar. Journey metaphor: night sky (where you are) → dawn (where you're going). */
+:root {
+  --bg: #f2f4fa;
+  --surface: #ffffff;
+  --surface-2: #e8ecf6;
+  --ink: #161a33;
+  --muted: #5b6283;
+  --line: #d5daea;
+  --accent: #c76a00;          /* dawn amber */
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe9d2;
+  --coral: #d9473a;
+  --good: #1f8a5b;
+  --good-soft: #dcf2e7;
+  --sky-1: #1b2150;
+  --sky-2: #3a3f8f;
+  --display: "Unbounded", "Montserrat", system-ui, sans-serif;
+  --body: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 16px;
+  --tabbar-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1226; --surface: #181c38; --surface-2: #222749; --ink: #eef0fb; --muted: #a2a8cc;
+    --line: #2e3460; --accent: #ffb547; --accent-ink: #1b1400; --accent-soft: #3a2f1c; --coral: #ff7a6b;
+    --good: #4fd19a; --good-soft: #17352b; --sky-1: #0b0e22; --sky-2: #2a2f72; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1226; --surface: #181c38; --surface-2: #222749; --ink: #eef0fb; --muted: #a2a8cc;
+  --line: #2e3460; --accent: #ffb547; --accent-ink: #1b1400; --accent-soft: #3a2f1c; --coral: #ff7a6b;
+  --good: #4fd19a; --good-soft: #17352b; --sky-1: #0b0e22; --sky-2: #2a2f72; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sky-1); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: inherit; }
+
+.app { max-width: 520px; margin: 0 auto; min-height: 100%; padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 16px); }
+
+/* top bar: the night sky */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
+  color: #fff;
+  padding-block: 12px 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center;
+}
+.brand { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: .01em; }
+.brand small { display: block; font-family: var(--body); font-weight: 500; font-size: 12px; opacity: .78; letter-spacing: 0; }
+.langs { display: flex; gap: 2px; background: rgba(255,255,255,.12); border-radius: 999px; padding: 3px; }
+.langs button { border: 0; background: transparent; color: #fff; font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 999px; opacity: .75; }
+.langs button[aria-pressed="true"] { background: #fff; color: #161a33; opacity: 1; }
+.stats { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.13); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip b { color: #ffcf7a; }
+
+/* view */
+.view {
+  padding-block: 18px 8px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 16px;
+}
+h1 { font-family: var(--display); font-size: 22px; line-height: 1.2; margin: 0; text-wrap: balance; font-weight: 700; }
+h2 { font-family: var(--display); font-size: 16px; margin: 0; font-weight: 500; }
+.lead { color: var(--muted); margin: 6px 0 0; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; font-weight: 700; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn {
+  border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 700; background: var(--accent); color: var(--accent-ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; min-height: 44px;
+}
+.btn.ghost { background: var(--surface-2); color: var(--ink); }
+.btn.full { width: 100%; }
+.btn:disabled { opacity: .5; cursor: default; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--muted); text-decoration: underline; font-size: 13px; align-self: flex-start; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.input, select.input, textarea.input {
+  width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; padding: 12px 14px; min-height: 46px;
+}
+textarea.input { min-height: 88px; resize: vertical; }
+.code-input { font-family: var(--display); font-size: 20px; letter-spacing: .14em; text-transform: uppercase; text-align: center; }
+.err { color: var(--coral); font-size: 13px; margin: 0; }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+.demo-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--accent-soft); color: var(--accent); padding: 3px 8px; border-radius: 6px; }
+
+/* unblur moments */
+.moment { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.moment .content { padding: 18px; display: flex; flex-direction: column; gap: 10px; transition: filter 1.1s ease, transform 1.1s ease; }
+.moment.blurred .content { filter: blur(9px) saturate(1.2); transform: scale(1.03); user-select: none; }
+.moment .veil {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center; gap: 6px; padding: 16px;
+  background: linear-gradient(180deg, rgba(15,18,38,.15), rgba(15,18,38,.45)); color: #fff; font-weight: 700;
+  transition: opacity .6s ease;
+}
+.moment:not(.blurred) .veil { opacity: 0; pointer-events: none; }
+.moment .veil span { background: rgba(15,18,38,.65); padding: 8px 14px; border-radius: 999px; font-size: 13px; }
+.moment.revealing .content::after {
+  content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,207,122,.45) 50%, transparent 70%);
+  animation: sweep 1.1s ease forwards; pointer-events: none;
+}
+@keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.m-title { font-family: var(--display); font-size: 17px; font-weight: 700; margin: 0; }
+.m-from { font-size: 12.5px; color: var(--muted); }
+.cover { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.cover li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--good-soft); font-weight: 600; }
+.cover li::before { content: "✓"; color: var(--good); font-weight: 800; }
+.letter { background: var(--bg); border: 1px dashed var(--line); border-radius: 12px; padding: 14px; font-size: 13.5px; display: flex; flex-direction: column; gap: 8px; }
+.letter .lh { font-family: Georgia, "Times New Roman", serif; font-size: 17px; font-weight: 700; }
+.redact { display: inline-block; background: var(--ink); border-radius: 3px; height: .9em; vertical-align: middle; }
+.quote { font-size: 15px; font-weight: 600; border-left: 3px solid var(--accent); padding-left: 12px; margin: 0; }
+.stamp { position: absolute; top: 12px; right: 12px; transform: rotate(8deg); border: 2px solid var(--coral); color: var(--coral); font-weight: 800; font-size: 11px; letter-spacing: .1em; padding: 2px 6px; border-radius: 6px; z-index: 1; }
+.archive { display: grid; gap: 10px; }
+.arch-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-align: left; width: 100%; }
+.arch-item .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); flex: none; font-size: 18px; }
+.arch-item .tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.arch-item .tx b { font-size: 14px; }
+.arch-item .tx small { color: var(--muted); font-size: 12px; }
+.arch-item.open .ic { background: var(--accent-soft); }
+
+/* quiz */
+.progress { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--coral)); border-radius: inherit; transition: width .4s ease; }
+.options { display: grid; gap: 8px; }
+.opt { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 13px 14px; text-align: left; font-weight: 600; min-height: 48px; }
+.opt:hover { border-color: var(--accent); }
+
+/* mirror result */
+.hero-head { display: flex; gap: 12px; align-items: center; }
+.avatar { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 20px; color: #fff; background: linear-gradient(135deg, var(--sky-2), var(--coral)); }
+.avatar.sm { width: 26px; height: 26px; font-size: 12px; }
+.kv { display: grid; gap: 8px; margin: 0; }
+.kv div { display: grid; gap: 2px; }
+.kv dt { font-size: 12px; color: var(--muted); font-weight: 600; }
+.kv dd { margin: 0; }
+.similar { background: var(--accent-soft); border-radius: 12px; padding: 12px; font-size: 14px; }
+
+/* map */
+.map-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.road { position: relative; display: flex; flex-direction: column; gap: 14px; padding-left: 34px; }
+.road::before { content: ""; position: absolute; left: 14px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px;
+  background: repeating-linear-gradient(180deg, var(--line) 0 8px, transparent 8px 14px); }
+.node { position: relative; }
+.node .dot { position: absolute; left: -34px; top: 12px; width: 31px; height: 31px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 2px solid var(--line); font-size: 13px; font-weight: 800; color: var(--muted); z-index: 1; }
+.node.done .dot { background: var(--good); border-color: var(--good); color: #fff; }
+.node.current .dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 6px var(--accent-soft); }
+.node.locked .card { opacity: .62; }
+.node.goal .card { background: linear-gradient(135deg, var(--sky-1), var(--sky-2)); color: #fff; border: 0; }
+.node.goal .dot { background: #ffcf7a; border-color: #ffcf7a; color: #161a33; }
+.node.start .card { background: var(--surface-2); }
+.node .card { padding: 12px 14px; gap: 8px; }
+.node h3 { margin: 0; font-size: 15px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.goal .hint, .goal .eyebrow { color: rgba(255,255,255,.75); }
+.hero-note { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.hero-note p { margin: 0; min-width: 0; }
+.quest { border: 2px solid var(--accent); }
+.quest .task { font-weight: 600; margin: 0; }
+.status-done { color: var(--good); font-weight: 700; font-size: 13px; }
+
+/* league */
+.goalbar { display: grid; gap: 6px; }
+.goalbar .progress { height: 10px; }
+.board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.board li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.board li.me { border-color: var(--accent); background: var(--accent-soft); }
+.board .rank { font-weight: 800; color: var(--muted); text-align: center; }
+.board .name { min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.board .pts { font-weight: 700; }
+.board .bar { grid-column: 2 / -1; height: 4px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.board .bar i { display: block; height: 100%; background: var(--accent); }
+
+/* tabbar */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px));
+}
+.tabbar nav { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: var(--tabbar-h); }
+.tabbar button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.tabbar button svg { width: 22px; height: 22px; }
+.tabbar button[aria-current="page"] { color: var(--accent); }
+
+.toast { position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 14px); transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; opacity: 0;
+  transition: opacity .25s, transform .25s; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.foot { text-align: center; font-size: 11.5px; color: var(--muted); padding-inline: 16px; margin: 8px 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand" id="brand">DreamHub<small id="brandSub"></small></div>
+    <div class="langs" role="group" aria-label="Language" id="langs">
+      <button data-lang="ru" type="button">RU</button>
+      <button data-lang="kk" type="button">ҚАЗ</button>
+      <button data-lang="en" type="button">EN</button>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <main class="view" id="view" aria-live="polite"></main>
+  <p class="foot" id="foot"></p>
+</div>
+
+<div class="tabbar">
+  <nav aria-label="Sections" id="tabs">
+    <button type="button" data-tab="unblur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span></span></button>
+    <button type="button" data-tab="mirror"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3.2 3.2 0 0 1 0 6.3M18 14.5c1.8.9 3 2.9 3 5.5"/></svg><span></span></button>
+    <button type="button" data-tab="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21c0-5 4-5 4-9s-4-4-4-8"/><circle cx="5" cy="4" r="1.6"/><path d="M14 20h6M17 17v6"/><path d="M12 7c3 0 6 1 6 4"/><circle cx="18" cy="13" r="1.6"/></svg><span></span></button>
+    <button type="button" data-tab="league"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span></span></button>
+  </nav>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ============================ settings ============================ */
+const CONFIG = {
+  botUsername: "your_bot",           // имя бота без @
+  appShortName: "dreamhub",          // короткое имя Mini App из @BotFather (/newapp)
+  examUrl: "https://ielts.idp.com",  // замените на страницу записи IDP в Казахстане
+  storiesUrl: "stories.json",
+};
+
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+/* ============================ texts ============================ */
+const T = {
+  ru: {
+    brand_sub: "Путь от IELTS до вуза мечты",
+    tab_unblur: "Unblur", tab_mirror: "Зеркало", tab_map: "Карта", tab_league: "Лига",
+    pts: "очков", streak: "серия", step: "шаг",
+    unblur_title: "Скрытые моменты",
+    unblur_lead: "Видел размытый момент в Shorts? Введи код из описания под видео, и он откроется.",
+    code_label: "Код из видео", btn_unblur: "Открыть",
+    code_bad: "Такого кода нет. Проверь описание под видео.",
+    code_demo: "Демо-коды: GRANT, OFFER, SPEAK",
+    from_story: "Из истории: {name}",
+    hidden: "Скрыто",
+    cta_mirror: "Хочешь такую же историю? Найди своё зеркало",
+    archive: "Архив моментов", arch_open: "Открыто — нажми, чтобы посмотреть",
+    arch_locked: "Откроется на шаге {n} карты или по коду из Short",
+    mirror_title: "AI Mirror",
+    mirror_lead: "6 вопросов, и мы найдём студента, который начинал там же, где ты.",
+    privacy: "Ответы видишь только ты.",
+    btn_start: "Начать", q_of: "Вопрос {n} из {total}",
+    q_role: "Кто ты сейчас?", q_goal: "Зачем тебе IELTS?", q_country: "Куда хочешь?",
+    q_level: "Как оцениваешь свой английский?", q_fear: "Что пугает больше всего?", q_time: "Сколько времени до цели?",
+    res_strong: "Твоё зеркало", res_partial: "Почти твоё зеркало",
+    res_none: "Твоего зеркала пока нет. Стань первым: пройди путь, а после экзамена расскажи свою историю. Она поможет следующему, кто окажется на твоём месте.",
+    similar: "В чём вы похожи", same_head: "Общее у вас: ", diff_head: " Отличается: ",
+    f_goal: "цель", f_fear: "главный страх", f_country: "страна мечты", f_role: "старт",
+    l_goal: "Цель", l_now: "Сейчас", l_fear: "Чего боялся(ась)", l_prep: "Как готовился(ась)", l_advice: "Совет",
+    demo_story: "Демо-история для прототипа",
+    btn_map: "Построить мою карту", btn_retake: "Пройти заново",
+    setup_title: "Откуда и куда?", setup_lead: "Отметим старт и финиш на твоей карте.",
+    setup_from: "Твой регион", setup_to: "Вуз, программа или город мечты", setup_to_ph: "Например: магистратура в Лондоне",
+    choose: "Выбери…", btn_save: "Сохранить",
+    map_title: "Карта мечты", map_progress: "Пройдено {n} из {total}",
+    start: "Старт", finish: "Финиш",
+    s_goal: "Выбери мечту", s_goal_h: "Куда ты идёшь — вуз, программа или город.",
+    s_mirror: "Найди своё зеркало", s_mirror_h: "Студент со схожим стартом, который уже дошёл.",
+    s_reqs: "Узнай требования к IELTS", s_reqs_h: "Найди на сайте вуза, какой балл нужен твоей программе.",
+    s_mock: "Пройди пробный тест", s_mock_h: "Узнай стартовый уровень, без стресса.",
+    s_practice: "7 дней практики: {area}", s_practice_h: "Квест дня — одно короткое задание.",
+    s_book: "Запишись на IELTS", s_book_h: "Выбери дату и центр сдачи.",
+    s_exam: "Сдай экзамен", s_exam_h: "Ты готовился(ась) — теперь твой день.",
+    s_back: "Стань зеркалом", s_back_h: "Твоя история поможет следующему.",
+    btn_did: "Сделано", btn_find: "Пройти тест", btn_open_book: "Открыть запись", btn_booked: "Я записался(ась)",
+    btn_parents: "Показать путь родителям", btn_story: "Рассказать свою историю", btn_setup: "Выбрать",
+    done: "Готово", days: "{n} из 7 дней",
+    hero_note: "{name}",
+    quest: "Квест дня", quest_ph: "Ответь на английском…", btn_send: "Отправить",
+    quest_done: "Квест на сегодня выполнен. Возвращайся завтра, чтобы не прервать серию.",
+    quest_need_mirror: "Квесты откроются, когда найдёшь своё зеркало: так мы узнаем, что тебе тренировать.",
+    demo_next: "Демо: следующий день",
+    league_title: "Лига регионов",
+    league_lead: "Очки считаются в среднем на активного участника, поэтому небольшой регион может обойти большой.",
+    your_region: "Твой регион", pick_region: "Выбери регион, чтобы играть за него",
+    week_goal: "Цель недели: {done} из {goal} квестов",
+    week_unlock: "Если регион выполнит цель, откроется эфир с героями-зеркалами.",
+    week_done: "Цель недели выполнена — эфир с героями открыт для твоего региона!",
+    per_member: "очков на участника",
+    btn_invite: "Позвать одноклассника", invite_note: "Очки за друга начисляются, когда он пройдёт тест.",
+    demo_data: "Демо-данные: в рабочей версии рейтинг считает сервер.",
+    t_points: "+{n} очков", t_unlock: "Открыт новый момент в архиве", t_step: "Шаг пройден!",
+    share_invite: "Я иду к вузу мечты в DreamHub. Присоединяйся — очки пойдут нашему региону!",
+    share_parents: "Мой путь к цели «{dream}»: пройдено {n} из {total} шагов в DreamHub. Следующий шаг: {next}.",
+    my_dream: "моя мечта",
+    foot: "Прототип команды Insight League для IDP Case Challenge · демо-данные",
+    areas: { speaking: "Speaking", writing: "Writing", listening: "Listening", reading: "Reading", start: "английский" },
+  },
+  kk: {
+    brand_sub: "IELTS-тен арман университетке дейінгі жол",
+    tab_unblur: "Unblur", tab_mirror: "Айна", tab_map: "Карта", tab_league: "Лига",
+    pts: "ұпай", streak: "серия", step: "қадам",
+    unblur_title: "Жасырын сәттер",
+    unblur_lead: "Shorts-тағы бұлыңғыр сәтті көрдің бе? Бейненің сипаттамасындағы кодты енгіз — ол ашылады.",
+    code_label: "Бейнедегі код", btn_unblur: "Ашу",
+    code_bad: "Мұндай код жоқ. Бейненің сипаттамасын тексер.",
+    code_demo: "Демо-кодтар: GRANT, OFFER, SPEAK",
+    from_story: "Тарихтан: {name}",
+    hidden: "Жасырын",
+    cta_mirror: "Осындай тарих керек пе? Өз айнаңды тап",
+    archive: "Сәттер мұрағаты", arch_open: "Ашық — көру үшін бас",
+    arch_locked: "Картаның {n}-қадамында немесе Shorts кодымен ашылады",
+    mirror_title: "AI Mirror",
+    mirror_lead: "6 сұрақ — және біз сен сияқты бастаған студентті табамыз.",
+    privacy: "Жауаптарыңды тек сен көресің.",
+    btn_start: "Бастау", q_of: "{total} сұрақтың {n}-сі",
+    q_role: "Қазір сен кімсің?", q_goal: "IELTS саған не үшін керек?", q_country: "Қайда барғың келеді?",
+    q_level: "Ағылшын тіліңді қалай бағалайсың?", q_fear: "Сені ең көп не қорқытады?", q_time: "Мақсатыңа дейін қанша уақыт бар?",
+    res_strong: "Сенің айнаң", res_partial: "Сенің айнаңа жақын",
+    res_none: "Сенің айнаң әзірге жоқ. Бірінші бол: жолдан өт, ал емтиханнан кейін өз тарихыңды айт. Ол сенің орныңдағы келесі адамға көмектеседі.",
+    similar: "Ұқсастығыңыз", same_head: "Ортақтарың: ", diff_head: " Айырмашылығы: ",
+    f_goal: "мақсат", f_fear: "басты қорқыныш", f_country: "арман елі", f_role: "бастау нүктесі",
+    l_goal: "Мақсаты", l_now: "Қазір", l_fear: "Неден қорықты", l_prep: "Қалай дайындалды", l_advice: "Кеңес",
+    demo_story: "Прототипке арналған демо-тарих",
+    btn_map: "Картамды құру", btn_retake: "Қайта өту",
+    setup_title: "Қайдан және қайда?", setup_lead: "Картаңда бастау мен мәреңді белгілейміз.",
+    setup_from: "Сенің өңірің", setup_to: "Арман университетің, бағдарламаң немесе қалаң", setup_to_ph: "Мысалы: Лондонда магистратура",
+    choose: "Таңда…", btn_save: "Сақтау",
+    map_title: "Арман картасы", map_progress: "{total} қадамның {n}-і өтілді",
+    start: "Бастау", finish: "Мәре",
+    s_goal: "Арманыңды таңда", s_goal_h: "Қайда бара жатырсың — университет, бағдарлама немесе қала.",
+    s_mirror: "Айнаңды тап", s_mirror_h: "Сен сияқты бастап, мақсатына жеткен студент.",
+    s_reqs: "IELTS талаптарын біл", s_reqs_h: "Университет сайтынан бағдарламаңа қандай балл керек екенін тап.",
+    s_mock: "Сынақ тесттен өт", s_mock_h: "Бастапқы деңгейіңді стресссіз біл.",
+    s_practice: "7 күндік жаттығу: {area}", s_practice_h: "Күннің квесті — бір қысқа тапсырма.",
+    s_book: "IELTS-ке жазыл", s_book_h: "Күн мен тапсыру орталығын таңда.",
+    s_exam: "Емтиханды тапсыр", s_exam_h: "Сен дайындалдың — енді сенің күнің.",
+    s_back: "Айна бол", s_back_h: "Сенің тарихың келесі адамға көмектеседі.",
+    btn_did: "Орындадым", btn_find: "Тесттен өту", btn_open_book: "Жазылуды ашу", btn_booked: "Жазылдым",
+    btn_parents: "Жолымды ата-анама көрсету", btn_story: "Өз тарихымды айту", btn_setup: "Таңдау",
+    done: "Дайын", days: "7 күннің {n}-і",
+    hero_note: "{name}",
+    quest: "Күннің квесті", quest_ph: "Ағылшынша жауап бер…", btn_send: "Жіберу",
+    quest_done: "Бүгінгі квест орындалды. Сериаңды үзбеу үшін ертең орал.",
+    quest_need_mirror: "Айнаңды тапқан соң квесттер ашылады: сонда нені жаттықтыру керегін білеміз.",
+    demo_next: "Демо: келесі күн",
+    league_title: "Өңірлер лигасы",
+    league_lead: "Ұпайлар белсенді қатысушыға шаққанда орташа есептеледі, сондықтан шағын өңір үлкенін басып озуы мүмкін.",
+    your_region: "Сенің өңірің", pick_region: "Ойнау үшін өңіріңді таңда",
+    week_goal: "Апта мақсаты: {goal} квесттің {done}-і",
+    week_unlock: "Өңір мақсатты орындаса, айна-кейіпкерлермен тікелей эфир ашылады.",
+    week_done: "Апта мақсаты орындалды — кейіпкерлермен эфир өңіріңе ашық!",
+    per_member: "қатысушыға шаққандағы ұпай",
+    btn_invite: "Сыныптасты шақыру", invite_note: "Досың тесттен өткенде ұпай беріледі.",
+    demo_data: "Демо-деректер: жұмыс нұсқасында рейтингті сервер есептейді.",
+    t_points: "+{n} ұпай", t_unlock: "Мұрағатта жаңа сәт ашылды", t_step: "Қадам өтілді!",
+    share_invite: "Мен DreamHub-та арман университетіме жол тартып келемін. Қосыл — ұпайлар біздің өңірге түседі!",
+    share_parents: "«{dream}» мақсатына жолым: DreamHub-та {total} қадамның {n}-і өтілді. Келесі қадам: {next}.",
+    my_dream: "менің арманым",
+    foot: "Insight League командасының IDP Case Challenge-ге арналған прототипі · демо-деректер",
+    areas: { speaking: "Speaking", writing: "Writing", listening: "Listening", reading: "Reading", start: "ағылшын тілі" },
+  },
+  en: {
+    brand_sub: "Your road from IELTS to a dream university",
+    tab_unblur: "Unblur", tab_mirror: "Mirror", tab_map: "Map", tab_league: "League",
+    pts: "points", streak: "streak", step: "step",
+    unblur_title: "Hidden moments",
+    unblur_lead: "Saw a blurred moment in a Short? Enter the code from the video description to reveal it.",
+    code_label: "Code from the video", btn_unblur: "Unblur",
+    code_bad: "That code doesn't exist. Check the video description.",
+    code_demo: "Demo codes: GRANT, OFFER, SPEAK",
+    from_story: "From {name}'s story",
+    hidden: "Hidden",
+    cta_mirror: "Want a story like this? Find your mirror",
+    archive: "Moments archive", arch_open: "Unlocked — tap to view",
+    arch_locked: "Unlocks at map step {n} or with a code from a Short",
+    mirror_title: "AI Mirror",
+    mirror_lead: "6 questions, and we'll find a student who started where you are now.",
+    privacy: "Only you see your answers.",
+    btn_start: "Start", q_of: "Question {n} of {total}",
+    q_role: "Who are you right now?", q_goal: "What do you need IELTS for?", q_country: "Where do you want to go?",
+    q_level: "How would you rate your English?", q_fear: "What scares you most?", q_time: "How much time until your goal?",
+    res_strong: "Your mirror", res_partial: "Almost your mirror",
+    res_none: "Your mirror isn't here yet. Be the first: walk the road, and after your exam share your story. It will help the next person in your place.",
+    similar: "What you have in common", same_head: "You share: ", diff_head: " Different: ",
+    f_goal: "goal", f_fear: "biggest fear", f_country: "dream destination", f_role: "starting point",
+    l_goal: "Goal", l_now: "Now", l_fear: "What scared them", l_prep: "How they prepared", l_advice: "Advice",
+    demo_story: "Demo story for the prototype",
+    btn_map: "Build my map", btn_retake: "Start over",
+    setup_title: "From where to where?", setup_lead: "We'll mark the start and finish of your map.",
+    setup_from: "Your region", setup_to: "Dream university, programme or city", setup_to_ph: "e.g. a master's in London",
+    choose: "Choose…", btn_save: "Save",
+    map_title: "Dream Map", map_progress: "{n} of {total} steps done",
+    start: "Start", finish: "Finish",
+    s_goal: "Choose your dream", s_goal_h: "Where you're going: a university, programme or city.",
+    s_mirror: "Find your mirror", s_mirror_h: "A student with a similar start who already made it.",
+    s_reqs: "Check the IELTS requirements", s_reqs_h: "Find the score your programme needs on the university website.",
+    s_mock: "Take a practice test", s_mock_h: "Find your starting level, no stress.",
+    s_practice: "7 days of {area} practice", s_practice_h: "Daily quest: one short task.",
+    s_book: "Book IELTS", s_book_h: "Choose a date and a test centre.",
+    s_exam: "Take the exam", s_exam_h: "You've prepared. Now it's your day.",
+    s_back: "Become a mirror", s_back_h: "Your story will help the next student.",
+    btn_did: "Done", btn_find: "Take the quiz", btn_open_book: "Open booking", btn_booked: "I've booked",
+    btn_parents: "Show my path to parents", btn_story: "Share my story", btn_setup: "Choose",
+    done: "Done", days: "{n} of 7 days",
+    hero_note: "{name}",
+    quest: "Daily quest", quest_ph: "Answer in English…", btn_send: "Send",
+    quest_done: "Today's quest is done. Come back tomorrow to keep your streak.",
+    quest_need_mirror: "Quests unlock once you find your mirror, so we know what you need to practise.",
+    demo_next: "Demo: next day",
+    league_title: "Regional League",
+    league_lead: "Points are averaged per active member, so a small region can beat a big one.",
+    your_region: "Your region", pick_region: "Pick a region to play for",
+    week_goal: "Weekly goal: {done} of {goal} quests",
+    week_unlock: "If your region hits the goal, a live Q&A with mirror heroes unlocks.",
+    week_done: "Weekly goal reached — the live Q&A with heroes is open for your region!",
+    per_member: "points per member",
+    btn_invite: "Invite a classmate", invite_note: "You get points when your friend completes the quiz.",
+    demo_data: "Demo data: in the live version a server calculates the ranking.",
+    t_points: "+{n} points", t_unlock: "New moment unlocked in the archive", t_step: "Step complete!",
+    share_invite: "I'm on my way to my dream university with DreamHub. Join me — your points go to our region!",
+    share_parents: "My road to \"{dream}\": {n} of {total} steps done in DreamHub. Next step: {next}.",
+    my_dream: "my dream",
+    foot: "Insight League prototype for the IDP Case Challenge · demo data",
+    areas: { speaking: "Speaking", writing: "Writing", listening: "Listening", reading: "Reading", start: "English" },
+  },
+};
+
+const OPTS = {
+  role: { school: ["Школьник", "Мектеп оқушысы", "School student"], student: ["Студент", "Студент", "University student"], graduate: ["Выпускник / работаю", "Түлек / жұмыс істеймін", "Graduate / working"] },
+  goal: { study: ["Учёба за рубежом", "Шетелде оқу", "Study abroad"], grant: ["Грант / стипендия", "Грант / стипендия", "Grant / scholarship"], work: ["Работа / переезд", "Жұмыс / көшу", "Work / relocation"] },
+  country: { uk: ["Великобритания", "Ұлыбритания", "United Kingdom"], australia: ["Австралия", "Аустралия", "Australia"], canada: ["Канада", "Канада", "Canada"], usa: ["США", "АҚШ", "USA"], europe: ["Европа", "Еуропа", "Europe"], asia: ["Азия", "Азия", "Asia"], any: ["Ещё не решил(а)", "Әлі шешкен жоқпын", "Not decided yet"] },
+  level: { beginner: ["Начальный", "Бастапқы", "Beginner"], intermediate: ["Средний", "Орта", "Intermediate"], advanced: ["Продвинутый", "Жоғары", "Advanced"], unknown: ["Не знаю", "Білмеймін", "Not sure"] },
+  fear: { speaking: ["Speaking", "Speaking", "Speaking"], writing: ["Writing", "Writing", "Writing"], listening: ["Listening", "Listening", "Listening"], reading: ["Reading", "Reading", "Reading"], start: ["Не знаю, с чего начать", "Неден бастарымды білмеймін", "Don't know where to start"] },
+  time: { lt3: ["Меньше 3 месяцев", "3 айдан аз", "Under 3 months"], "3_6": ["3–6 месяцев", "3–6 ай", "3–6 months"], "6_12": ["6–12 месяцев", "6–12 ай", "6–12 months"], gt12: ["Больше года", "Бір жылдан көп", "Over a year"] },
+};
+const QUIZ = ["role", "goal", "country", "level", "fear", "time"];
+const LIDX = { ru: 0, kk: 1, en: 2 };
+
+const REGIONS = {
+  astana: ["Астана", "Астана", "Astana"], almaty_city: ["Алматы", "Алматы", "Almaty"], shymkent: ["Шымкент", "Шымкент", "Shymkent"],
+  abai: ["Абайская обл.", "Абай облысы", "Abai Region"], akmola: ["Акмолинская обл.", "Ақмола облысы", "Akmola Region"],
+  aktobe: ["Актюбинская обл.", "Ақтөбе облысы", "Aktobe Region"], almaty_reg: ["Алматинская обл.", "Алматы облысы", "Almaty Region"],
+  atyrau: ["Атырауская обл.", "Атырау облысы", "Atyrau Region"], vko: ["ВКО", "Шығыс Қазақстан облысы", "East Kazakhstan"],
+  zhambyl: ["Жамбылская обл.", "Жамбыл облысы", "Jambyl Region"], zhetisu: ["Жетысуская обл.", "Жетісу облысы", "Jetisu Region"],
+  karaganda: ["Карагандинская обл.", "Қарағанды облысы", "Karaganda Region"], kostanay: ["Костанайская обл.", "Қостанай облысы", "Kostanay Region"],
+  kyzylorda: ["Кызылординская обл.", "Қызылорда облысы", "Kyzylorda Region"], mangystau: ["Мангистауская обл.", "Маңғыстау облысы", "Mangystau Region"],
+  pavlodar: ["Павлодарская обл.", "Павлодар облысы", "Pavlodar Region"], sko: ["СКО", "Солтүстік Қазақстан облысы", "North Kazakhstan"],
+  turkistan: ["Туркестанская обл.", "Түркістан облысы", "Turkistan Region"], ulytau: ["Улытауская обл.", "Ұлытау облысы", "Ulytau Region"],
+  zko: ["ЗКО", "Батыс Қазақстан облысы", "West Kazakhstan"],
+};
+// ДЕМО: очки на активного участника по регионам. В рабочей версии их считает сервер.
+const DEMO_LEAGUE = { astana: 84, almaty_city: 81, shymkent: 66, abai: 52, akmola: 58, aktobe: 63, almaty_reg: 55, atyrau: 61,
+  vko: 57, zhambyl: 54, zhetisu: 49, karaganda: 69, kostanay: 51, kyzylorda: 72, mangystau: 60, pavlodar: 62, sko: 47,
+  turkistan: 64, ulytau: 44, zko: 53 };
+const DEMO_WEEK = { done: 412, goal: 500, members: 40 };
+
+// Задания квестов: в стиле подготовки к экзамену, не реальные задания IELTS.
+const QUESTS = {
+  speaking: ["Talk for one minute about a place in your city you love. Why do you like it?",
+    "Describe a person who inspires you. Who are they and what did they do?",
+    "Do you prefer studying alone or with others? Give two reasons.",
+    "Describe a skill you learned recently. How did you learn it?",
+    "Talk about a city abroad you'd like to live in. What would your day look like?",
+    "What is the best advice you have ever received? Explain why.",
+    "Describe your perfect weekend in under one minute."],
+  writing: ["Write 3–4 sentences: what will your life look like one year after you pass IELTS?",
+    "Some people think studying abroad is the best way to learn a language. Give your opinion in 4–5 sentences.",
+    "Write a short email to a friend inviting them to prepare for IELTS together.",
+    "Describe your hometown to someone who has never been there, in 5 sentences.",
+    "Write two arguments for and two against online learning.",
+    "Write a short paragraph about a problem in your city and one way to solve it.",
+    "Rewrite this sentence in three different ways: 'Education opens many doors.'"],
+  listening: ["Watch any English video for 5 minutes without subtitles. Write down 3 words you heard but didn't know.",
+    "Listen to an English podcast intro and write one sentence about what the episode is about.",
+    "Watch a short English news clip and write down two numbers or names you heard.",
+    "Listen to a song in English and write down one full line you understood.",
+    "Watch a campus tour video of a university you like. Write 3 things you learned.",
+    "Listen to someone with an accent you find hard. Write 2 words you could still catch.",
+    "Watch a 3-minute interview in English and summarise it in one sentence."],
+  reading: ["Read one short English news article. Summarise it in two sentences.",
+    "Find an English text about a university you'd like to study at. Write 3 facts you learned.",
+    "Read any English paragraph and write down 3 words you would use in your own speech.",
+    "Read a short English story or blog post and write what the main idea is.",
+    "Skim an English article for 2 minutes. Write its topic without reading it fully.",
+    "Find 3 linking words (however, therefore…) in an English text and write them down.",
+    "Read an English recipe or instruction and list the steps in your own words."],
+  start: ["Introduce yourself in English in 3–4 sentences: who you are and why you want to take IELTS.",
+    "Write 5 English words connected with your dream city or university.",
+    "Say or write one thing you will do in English every day this week.",
+    "Write 3 sentences about your favourite hobby.",
+    "Find an English song you like and write its title and one word from it you learned.",
+    "Write 3 questions you would ask a student who studies abroad.",
+    "Describe your morning routine in 4 simple sentences."],
+};
+
+// Скрытые моменты. ДЕМО-содержание для прототипа: замените реальными материалами героев (с их согласием).
+const MOMENTS = [
+  { code: "GRANT", hero: "s01", level: 2, icon: "🎓",
+    title: ["Что покрывает мой грант", "Грантым нені өтейді", "What my scholarship covers"],
+    kind: "cover",
+    items: [["Обучение", "Оқу ақысы", "Tuition"], ["Проживание", "Тұрғын үй", "Accommodation"], ["Перелёт", "Ұшу билеті", "Flights"], ["Ежемесячная стипендия", "Ай сайынғы стипендия", "Monthly stipend"]],
+    note: ["Условия у каждой программы свои — проверяй на сайте фонда.", "Әр бағдарламаның шарты әртүрлі — қор сайтынан тексер.", "Every programme has its own terms. Check the funder's website."] },
+  { code: "OFFER", hero: "s02", level: 4, icon: "✉️",
+    title: ["Моё письмо о зачислении", "Қабылдау туралы хатым", "My offer letter"],
+    kind: "letter" },
+  { code: "SPEAK", hero: "s05", level: 6, icon: "🎙️",
+    title: ["Мой главный приём на Speaking", "Speaking-тегі басты тәсілім", "My main Speaking trick"],
+    kind: "quote",
+    text: ["Перед ответом я беру две секунды и начинаю с фразы-моста: «That's an interesting question, because…». Это даёт время подумать и звучит естественно.",
+      "Жауап берер алдында екі секунд аламын да, көпір-фразадан бастаймын: «That's an interesting question, because…». Бұл ойлануға уақыт береді әрі табиғи естіледі.",
+      "Before answering I take two seconds and start with a bridge phrase: \"That's an interesting question, because…\". It buys time to think and sounds natural."] },
+];
+
+/* ============================ state ============================ */
+const DEFAULT = { lang: null, tab: "unblur", points: 0, streak: 0, lastQuestDay: null, dayOffset: 0, questCount: 0,
+  practiceDays: 0, profile: {}, quizStep: -1, mirror: null, setup: null, steps: {}, unlocked: [], openMoment: null,
+  regionQuests: 0, firstRun: true };
+let S = Object.assign({}, DEFAULT);
+let STORIES = [];
+const KEY = "dreamhub_state_v1";
+
+const store = {
+  async load() {
+    try {
+      if (tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9")) {
+        const v = await new Promise(res => tg.CloudStorage.getItem(KEY, (e, val) => res(e ? null : val)));
+        if (v) return JSON.parse(v);
+      }
+    } catch (e) {}
+    try { const v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; }
+  },
+  save() {
+    const data = JSON.stringify(S);
+    try { if (tg && tg.CloudStorage && tg.isVersionAtLeast && tg.isVersionAtLeast("6.9")) tg.CloudStorage.setItem(KEY, data, () => {}); } catch (e) {}
+    try { localStorage.setItem(KEY, data); } catch (e) {}
+  },
+};
+
+/* ============================ helpers ============================ */
+const $ = sel => document.querySelector(sel);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const L = () => S.lang || "ru";
+const t = (k, vars) => { let s = (T[L()][k] != null ? T[L()][k] : T.ru[k]) || k; if (vars) for (const [a, b] of Object.entries(vars)) s = s.split("{" + a + "}").join(b); return s; };
+const tri = arr => arr[LIDX[L()]] || arr[0];
+const loc = v => (v && typeof v === "object") ? (v[L()] || v.ru || "") : (v || "");
+const opt = (f, c) => tri(OPTS[f][c]);
+const today = () => { const d = new Date(Date.now() + S.dayOffset * 864e5); return d.toISOString().slice(0, 10); };
+const heroName = s => s.public_name_consent ? ((s.name_i18n && s.name_i18n[L()]) || s.name) : cap(loc(s.pseudonym));
+const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const story = id => STORIES.find(s => s.id === id);
+const haptic = type => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(type); } catch (e) {} };
+
+let toastTimer;
+function toast(msg) {
+  const el = $("#toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+}
+function addPoints(n) { S.points += n; toast(t("t_points", { n })); }
+
+function link(url) {
+  // В Telegram ссылки открываем средствами Mini App, в браузере — обычной ссылкой.
+  if (tg) {
+    try { if (url.startsWith("https://t.me/")) tg.openTelegramLink(url); else tg.openLink(url); return; } catch (e) {}
+  }
+  const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+const appLink = param => `https://t.me/${CONFIG.botUsername}/${CONFIG.appShortName}${param ? "?startapp=" + encodeURIComponent(param) : ""}`;
+const shareLink = (url, text) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+const userId = () => { try { return tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "demo"; } catch (e) { return "demo"; } };
+
+/* ============================ matching (as in the bot) ============================ */
+const FIELDS = ["role", "goal", "country", "level", "fear", "time"];
+const W = { goal: 3, fear: 3, country: 2, role: 1, level: 1, time: 1 };
+function compare(p, s) {
+  let score = 0; const same = [], diff = [];
+  for (const f of FIELDS) {
+    const mine = p[f];
+    if (!mine || (f === "country" && mine === "any") || (f === "level" && mine === "unknown")) continue;
+    if (s[f] === mine) { score += W[f]; same.push(f); } else diff.push(f);
+  }
+  return { score, same, diff, s };
+}
+function bestMatch(p) {
+  const rows = STORIES.map(s => compare(p, s));
+  rows.sort((a, b) => (b.score - a.score) || ((b.same.includes("goal") && b.same.includes("fear")) - (a.same.includes("goal") && a.same.includes("fear"))));
+  const r = rows[0];
+  if (!r) return null;
+  const level = r.same.includes("goal") && r.same.includes("fear") ? "strong" : (r.score >= 3 ? "partial" : "none");
+  if (level === "none") return { level, id: null, same: [], diff: [] };
+  return { level, id: r.s.id, same: r.same, diff: r.diff };
+}
+function explain(m) {
+  const show = ["goal", "fear", "country", "role"];
+  const parts = show.filter(f => m.same.includes(f)).map(f => `${t("f_" + f)} — ${opt(f, S.profile[f])}`);
+  if (!parts.length) return "";
+  let txt = t("same_head") + parts.join("; ") + ".";
+  const d = show.filter(f => m.diff.includes(f)).map(f => t("f_" + f));
+  if (d.length) txt += t("diff_head") + d.join(", ") + ".";
+  return txt;
+}
+
+/* ============================ map steps ============================ */
+const STEPS = ["goal", "mirror", "reqs", "mock", "practice", "book", "exam", "back"];
+function stepDone(id) {
+  if (id === "goal") return !!(S.setup && S.setup.dream);
+  if (id === "mirror") return !!S.mirror;
+  if (id === "practice") return S.practiceDays >= 7;
+  return !!S.steps[id];
+}
+const doneCount = () => STEPS.filter(stepDone).length;
+const currentStep = () => STEPS.find(id => !stepDone(id)) || null;
+function checkUnlocks() {
+  const n = doneCount();
+  for (const m of MOMENTS) {
+    if (!S.unlocked.includes(m.code) && n >= m.level) { S.unlocked.push(m.code); toast(t("t_unlock")); }
+  }
+}
+function completeStep(id) {
+  if (stepDone(id)) return;
+  S.steps[id] = true; addPoints(20); haptic("success");
+  setTimeout(() => toast(t("t_step")), 900);
+  checkUnlocks();
+}
+
+/* ============================ render ============================ */
+function render() {
+  document.documentElement.lang = L();
+  $("#brandSub").textContent = t("brand_sub");
+  document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === L())));
+  $("#stats").innerHTML = `<span class="chip">⚡ <b>${S.points}</b> ${esc(t("pts"))}</span><span class="chip">🔥 ${esc(t("streak"))} <b>${S.streak}</b></span>` +
+    `<span class="chip">🗺️ <b>${doneCount()}/${STEPS.length}</b></span>`;
+  document.querySelectorAll("#tabs button").forEach(b => {
+    b.querySelector("span").textContent = t("tab_" + b.dataset.tab);
+    if (b.dataset.tab === S.tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  $("#foot").textContent = t("foot");
+  const v = $("#view");
+  v.innerHTML = ({ unblur: viewUnblur, mirror: viewMirror, map: viewMap, league: viewLeague })[S.tab]();
+  store.save();
+}
+
+function momentHTML(m, blurred) {
+  const s = story(m.hero);
+  let body = "";
+  if (m.kind === "cover") {
+    body = `<ul class="cover">${m.items.map(i => `<li>${esc(tri(i))}</li>`).join("")}</ul><p class="note">${esc(tri(m.note))}</p>`;
+  } else if (m.kind === "letter") {
+    const nm = s ? heroName(s) : "";
+    body = `<div class="letter"><span class="lh">Offer of Admission</span>
+      <span>Dear ${esc(nm)},</span>
+      <span>We are pleased to offer you a place on the <span class="redact" style="width:9em"></span> programme at <span class="redact" style="width:7em"></span> University, starting <span class="redact" style="width:4em"></span>.</span>
+      <span>Condition: IELTS Academic at the level required by the programme.</span>
+      <span>Welcome to our community.</span></div>`;
+  } else {
+    body = `<p class="quote">${esc(tri(m.text))}</p>`;
+  }
+  return `<div class="moment ${blurred ? "blurred" : ""}" id="moment-${m.code}">
+    <span class="stamp">DEMO</span>
+    <div class="content">
+      <p class="m-title">${esc(tri(m.title))}</p>
+      <span class="m-from">${esc(t("from_story", { name: s ? heroName(s) : "" }))}</span>
+      ${body}
+    </div>
+    <div class="veil"><span>🔒 ${esc(t("hidden"))}</span></div>
+  </div>`;
+}
+
+function viewUnblur() {
+  const open = S.openMoment ? MOMENTS.find(m => m.code === S.openMoment) : null;
+  const preview = open || MOMENTS[0];
+  const isOpen = !!open && S.unlocked.includes(open.code);
+  return `
+  <section>
+    <h1>${esc(t("unblur_title"))}</h1>
+    <p class="lead">${esc(t("unblur_lead"))}</p>
+  </section>
+  <form class="card" id="codeForm" autocomplete="off">
+    <div class="field">
+      <label for="code">${esc(t("code_label"))}</label>
+      <input class="input code-input" id="code" name="code" maxlength="12" value="${esc(S.pendingCode || "")}" placeholder="GRANT" autocapitalize="characters" spellcheck="false">
+    </div>
+    <p class="err" id="codeErr" hidden>${esc(t("code_bad"))}</p>
+    <button class="btn full" type="submit">${esc(t("btn_unblur"))}</button>
+    <p class="note">${esc(t("code_demo"))}</p>
+  </form>
+  ${momentHTML(preview, !isOpen)}
+  ${isOpen ? `<button class="btn full" data-act="goMirror" type="button">${esc(t("cta_mirror"))}</button>` : ""}
+  <section class="card">
+    <h2>${esc(t("archive"))}</h2>
+    <div class="archive">
+      ${MOMENTS.map(m => {
+        const un = S.unlocked.includes(m.code);
+        return `<button type="button" class="arch-item ${un ? "open" : ""}" data-act="viewMoment" data-code="${m.code}">
+          <span class="ic" aria-hidden="true">${un ? m.icon : "🔒"}</span>
+          <span class="tx"><b>${esc(tri(m.title))}</b><small>${esc(un ? t("arch_open") : t("arch_locked", { n: m.level }))}</small></span>
+        </button>`; }).join("")}
+    </div>
+  </section>`;
+}
+
+function viewMirror() {
+  if (S.quizStep >= 0 && S.quizStep < QUIZ.length) {
+    const f = QUIZ[S.quizStep];
+    return `<section class="card">
+      <span class="eyebrow">${esc(t("q_of", { n: S.quizStep + 1, total: QUIZ.length }))}</span>
+      <div class="progress" aria-hidden="true"><i style="width:${(S.quizStep / QUIZ.length) * 100}%"></i></div>
+      <h2>${esc(t("q_" + f))}</h2>
+      <div class="options">${Object.keys(OPTS[f]).map(c => `<button type="button" class="opt" data-act="answer" data-f="${f}" data-c="${c}">${esc(opt(f, c))}</button>`).join("")}</div>
+    </section>`;
+  }
+  if (S.mirror) {
+    const m = S.mirror;
+    if (m.level === "none") {
+      return `<section class="card"><h1>${esc(t("mirror_title"))}</h1><p>${esc(t("res_none"))}</p>
+        <button class="btn" type="button" data-act="goMap">${esc(t("btn_map"))}</button>
+        <button class="linkbtn" type="button" data-act="retake">${esc(t("btn_retake"))}</button></section>`;
+    }
+    const s = story(m.id);
+    const why = explain(m);
+    return `<section class="card">
+      <span class="eyebrow">${esc(t(m.level === "strong" ? "res_strong" : "res_partial"))}</span>
+      <div class="hero-head"><div class="avatar" aria-hidden="true">${esc(heroName(s).charAt(0))}</div>
+        <div><h1>${esc(heroName(s))}</h1>${s.public_name_consent ? `<span class="m-from">${esc(loc(s.city))}</span>` : ""}</div></div>
+      ${s.demo ? `<span class="demo-tag">${esc(t("demo_story"))}</span>` : ""}
+      ${why ? `<div class="similar"><b>${esc(t("similar"))}.</b> ${esc(why)}</div>` : ""}
+      <dl class="kv">
+        <div><dt>${esc(t("l_goal"))}</dt><dd>${esc(loc(s.goal_text))}</dd></div>
+        <div><dt>${esc(t("l_now"))}</dt><dd>${esc(loc(s.now))}</dd></div>
+        <div><dt>${esc(t("l_fear"))}</dt><dd>${esc(loc(s.fear_text))}</dd></div>
+        <div><dt>${esc(t("l_prep"))}</dt><dd>${esc(loc(s.prep))}</dd></div>
+        <div><dt>${esc(t("l_advice"))}</dt><dd>«${esc(loc(s.advice))}»</dd></div>
+      </dl>
+      <button class="btn full" type="button" data-act="goMap">${esc(t("btn_map"))}</button>
+      <button class="linkbtn" type="button" data-act="retake">${esc(t("btn_retake"))}</button>
+    </section>`;
+  }
+  return `<section class="card">
+    <h1>${esc(t("mirror_title"))}</h1>
+    <p class="lead">${esc(t("mirror_lead"))}</p>
+    <p class="note">🔒 ${esc(t("privacy"))}</p>
+    <button class="btn full" type="button" data-act="startQuiz">${esc(t("btn_start"))}</button>
+  </section>`;
+}
+
+function setupForm() {
+  const reg = S.setup && S.setup.region || "";
+  return `<form class="card" id="setupForm">
+    <h2>${esc(t("setup_title"))}</h2><p class="hint">${esc(t("setup_lead"))}</p>
+    <div class="field"><label for="region">${esc(t("setup_from"))}</label>
+      <select class="input" id="region" name="region" required><option value="">${esc(t("choose"))}</option>
+      ${Object.keys(REGIONS).map(k => `<option value="${k}" ${k === reg ? "selected" : ""}>${esc(tri(REGIONS[k]))}</option>`).join("")}</select></div>
+    <div class="field"><label for="dream">${esc(t("setup_to"))}</label>
+      <input class="input" id="dream" name="dream" maxlength="80" required placeholder="${esc(t("setup_to_ph"))}" value="${esc(S.setup && S.setup.dream || "")}"></div>
+    <button class="btn full" type="submit">${esc(t("btn_save"))}</button>
+  </form>`;
+}
+
+function questCard() {
+  if (!S.mirror) return `<section class="card quest"><span class="eyebrow">${esc(t("quest"))}</span><p class="hint">${esc(t("quest_need_mirror"))}</p>
+    <button class="btn" type="button" data-act="goMirror">${esc(t("btn_find"))}</button></section>`;
+  const area = S.profile.fear || "start";
+  const done = S.lastQuestDay === today();
+  const task = QUESTS[area][S.questCount % QUESTS[area].length];
+  return `<section class="card quest">
+    <div class="row" style="justify-content:space-between"><span class="eyebrow">${esc(t("quest"))} · ${esc(T[L()].areas[area])}</span><span class="eyebrow">🔥 ${S.streak}</span></div>
+    ${done ? `<p class="status-done">✓ ${esc(t("quest_done"))}</p><button class="linkbtn" type="button" data-act="nextDay">${esc(t("demo_next"))}</button>` :
+      `<p class="task" lang="en">${esc(task)}</p>
+       <form id="questForm" class="field"><label for="answer" class="sr">${esc(t("quest"))}</label>
+         <textarea class="input" id="answer" name="answer" required placeholder="${esc(t("quest_ph"))}"></textarea>
+         <button class="btn" type="submit">${esc(t("btn_send"))} · +10 ⚡</button></form>`}
+  </section>`;
+}
+
+function stepCard(id, idx, state) {
+  const area = T[L()].areas[S.profile.fear || "start"];
+  const title = t("s_" + id, { area });
+  const hint = t("s_" + id + "_h");
+  const s = S.mirror && S.mirror.id ? story(S.mirror.id) : null;
+  let heroNote = "";
+  if (s && id === "mock") heroNote = loc(s.fear_text);
+  if (s && id === "practice") heroNote = loc(s.prep);
+  if (s && id === "exam") heroNote = "«" + loc(s.advice) + "»";
+  let action = "";
+  if (state === "current") {
+    if (id === "goal") action = `<button class="btn" type="button" data-act="openSetup">${esc(t("btn_setup"))}</button>`;
+    else if (id === "mirror") action = `<button class="btn" type="button" data-act="goMirror">${esc(t("btn_find"))}</button>`;
+    else if (id === "practice") action = `<span class="status-done" style="color:var(--accent)">${esc(t("days", { n: S.practiceDays }))}</span>`;
+    else if (id === "book") action = `<div class="row"><button class="btn" type="button" data-act="openExam">${esc(t("btn_open_book"))}</button><button class="btn ghost" type="button" data-act="done" data-step="book">${esc(t("btn_booked"))}</button></div>`;
+    else if (id === "back") action = `<button class="btn" type="button" data-act="story">${esc(t("btn_story"))}</button>`;
+    else action = `<button class="btn" type="button" data-act="done" data-step="${id}">${esc(t("btn_did"))}</button>`;
+  }
+  if (id === "book" && (state === "current" || state === "done")) action += `<button class="btn ghost" type="button" data-act="parents">👨‍👩‍👧 ${esc(t("btn_parents"))}</button>`;
+  return `<div class="node ${state}">
+    <span class="dot" aria-hidden="true">${state === "done" ? "✓" : idx + 1}</span>
+    <div class="card">
+      <h3>${esc(title)}</h3>
+      <p class="hint">${esc(hint)}</p>
+      ${heroNote && state !== "locked" ? `<div class="hero-note"><span class="avatar sm" aria-hidden="true">${esc(heroName(s).charAt(0))}</span><p><b>${esc(heroName(s))}:</b> ${esc(heroNote)}</p></div>` : ""}
+      ${state === "done" ? `<span class="status-done">✓ ${esc(t("done"))}</span>` : ""}
+      ${action}
+    </div>
+  </div>`;
+}
+
+function viewMap() {
+  if (S.showSetup || (!S.setup && S.mirror)) return setupForm();
+  const cur = currentStep();
+  const n = doneCount();
+  const dream = S.setup && S.setup.dream ? S.setup.dream : t("my_dream");
+  const from = S.setup && S.setup.region ? tri(REGIONS[S.setup.region]) : "—";
+  const nodes = STEPS.map((id, i) => stepCard(id, i, stepDone(id) ? "done" : (id === cur ? "current" : "locked")));
+  // финиш сверху, старт снизу: путь читается снизу вверх, как карта уровней
+  return `
+  <section class="map-head"><div><h1>${esc(t("map_title"))}</h1><p class="lead">${esc(t("map_progress", { n, total: STEPS.length }))}</p></div></section>
+  <div class="progress" aria-hidden="true"><i style="width:${n / STEPS.length * 100}%"></i></div>
+  ${questCard()}
+  <div class="road">
+    <div class="node goal"><span class="dot" aria-hidden="true">★</span><div class="card"><span class="eyebrow">${esc(t("finish"))}</span><h3>${esc(dream)}</h3></div></div>
+    ${nodes.reverse().join("")}
+    <div class="node start"><span class="dot" aria-hidden="true">●</span><div class="card"><span class="eyebrow">${esc(t("start"))}</span><h3>${esc(from)}</h3></div></div>
+  </div>`;
+}
+
+function viewLeague() {
+  const reg = S.setup && S.setup.region;
+  if (!reg) return `<section><h1>${esc(t("league_title"))}</h1><p class="lead">${esc(t("pick_region"))}</p></section>${setupForm()}`;
+  const scores = Object.assign({}, DEMO_LEAGUE);
+  scores[reg] = Math.round((DEMO_LEAGUE[reg] * DEMO_WEEK.members + S.points) / DEMO_WEEK.members * 10) / 10;
+  const rows = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const max = rows[0][1];
+  const wDone = Math.min(DEMO_WEEK.goal, DEMO_WEEK.done + S.regionQuests);
+  const pct = wDone / DEMO_WEEK.goal * 100;
+  const invite = shareLink(appLink("ref_" + userId()), t("share_invite"));
+  return `
+  <section><h1>${esc(t("league_title"))}</h1><p class="lead">${esc(t("league_lead"))}</p></section>
+  <section class="card">
+    <span class="eyebrow">${esc(t("your_region"))}: ${esc(tri(REGIONS[reg]))}</span>
+    <div class="goalbar"><b>${esc(t("week_goal", { done: wDone, goal: DEMO_WEEK.goal }))}</b>
+      <div class="progress"><i style="width:${pct}%"></i></div></div>
+    <p class="hint">${esc(wDone >= DEMO_WEEK.goal ? t("week_done") : t("week_unlock"))}</p>
+    <a class="btn full" href="${esc(invite)}" target="_blank" rel="noopener" data-act="invite">${esc(t("btn_invite"))}</a>
+    <p class="note">${esc(t("invite_note"))}</p>
+  </section>
+  <ol class="board">
+    ${rows.map(([k, v], i) => `<li class="${k === reg ? "me" : ""}"><span class="rank">${i + 1}</span><span class="name">${esc(tri(REGIONS[k]))}</span><span class="pts">${v}</span>
+      <span class="bar" aria-hidden="true"><i style="width:${v / max * 100}%"></i></span></li>`).join("")}
+  </ol>
+  <p class="note">${esc(t("per_member"))} · ${esc(t("demo_data"))}</p>`;
+}
+
+/* ============================ actions ============================ */
+function go(tab) {
+  S.tab = tab; S.showSetup = false; render(); window.scrollTo(0, 0);
+  // на карте сразу показываем текущий шаг, а не финиш
+  if (tab === "map") { const cur = document.querySelector(".node.current"); if (cur) setTimeout(() => cur.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }
+}
+
+function unblur(code) {
+  const m = MOMENTS.find(x => x.code === code);
+  if (!m) { const e = $("#codeErr"); if (e) e.hidden = false; haptic("error"); return; }
+  const fresh = !S.unlocked.includes(code);
+  if (fresh) { S.unlocked.push(code); }
+  S.openMoment = code; S.pendingCode = "";
+  render();
+  const el = $("#moment-" + code);
+  if (el && fresh) {
+    el.classList.add("blurred");
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.add("revealing"); el.classList.remove("blurred"); }));
+    haptic("success");
+    setTimeout(() => { addPoints(5); render(); }, 1200);
+  }
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+document.addEventListener("click", e => {
+  const lb = e.target.closest("#langs button"); if (lb) { S.lang = lb.dataset.lang; render(); return; }
+  const tb = e.target.closest("#tabs button"); if (tb) { go(tb.dataset.tab); return; }
+  const a = e.target.closest("[data-act]"); if (!a) return;
+  const act = a.dataset.act;
+  if (act === "goMirror") go("mirror");
+  else if (act === "goMap") go("map");
+  else if (act === "viewMoment") {
+    const code = a.dataset.code;
+    if (S.unlocked.includes(code)) { S.openMoment = code; render(); const el = $("#moment-" + code); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    else { const inp = $("#code"); if (inp) { inp.focus(); } }
+  }
+  else if (act === "startQuiz") { S.quizStep = 0; S.profile = {}; render(); }
+  else if (act === "answer") {
+    S.profile[a.dataset.f] = a.dataset.c; S.quizStep++;
+    if (S.quizStep >= QUIZ.length) {
+      S.quizStep = -1; S.mirror = bestMatch(S.profile);
+      if (!S.mirrorRewarded) { S.mirrorRewarded = true; addPoints(20); }
+      checkUnlocks();
+    }
+    render(); window.scrollTo(0, 0);
+  }
+  else if (act === "retake") { S.mirror = null; S.quizStep = 0; S.profile = {}; render(); }
+  else if (act === "openSetup") { S.showSetup = true; render(); }
+  else if (act === "done") { completeStep(a.dataset.step); render(); }
+  else if (act === "openExam") link(CONFIG.examUrl);
+  else if (act === "parents") {
+    const cur = currentStep();
+    const area = T[L()].areas[S.profile.fear || "start"];
+    const next = cur ? t("s_" + cur, { area }) : t("done");
+    link(shareLink(appLink(""), t("share_parents", { dream: S.setup && S.setup.dream || t("my_dream"), n: doneCount(), total: STEPS.length, next })));
+  }
+  else if (act === "story") link(`https://t.me/${CONFIG.botUsername}?start=become`);
+  else if (act === "invite") { if (tg) { e.preventDefault(); link(a.href); } }
+  else if (act === "nextDay") { S.dayOffset++; render(); }
+});
+
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.id === "codeForm") unblur(String(f.code.value || "").trim().toUpperCase());
+  else if (f.id === "setupForm") {
+    const region = f.region.value, dream = f.dream.value.trim();
+    if (!region || !dream) return;
+    const wasDone = stepDone("goal");
+    S.setup = { region, dream }; S.showSetup = false;
+    if (!wasDone && !S.goalRewarded) { S.goalRewarded = true; addPoints(20); }
+    checkUnlocks();
+    render();
+  }
+  else if (f.id === "questForm") {
+    const ans = f.answer.value.trim(); if (!ans) return;
+    const d = today();
+    const y = new Date(Date.now() + (S.dayOffset - 1) * 864e5).toISOString().slice(0, 10);
+    S.streak = S.lastQuestDay === y ? S.streak + 1 : 1;
+    S.lastQuestDay = d; S.questCount++; S.regionQuests++;
+    if (S.practiceDays < 7) S.practiceDays++;
+    addPoints(10); haptic("success"); checkUnlocks();
+    render();
+  }
+});
+
+/* ============================ start ============================ */
+async function init() {
+  if (tg) {
+    try { tg.ready(); tg.expand(); } catch (e) {}
+    try { tg.setHeaderColor && tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue("--sky-1").trim() || "#1b2150"); } catch (e) {}
+    try { if (tg.colorScheme) document.documentElement.setAttribute("data-theme", tg.colorScheme); } catch (e) {}
+  }
+  const saved = await store.load();
+  if (saved) S = Object.assign({}, DEFAULT, saved);
+  if (!S.lang) {
+    const lc = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code || navigator.language || "ru";
+    S.lang = lc.startsWith("kk") ? "kk" : lc.startsWith("en") ? "en" : "ru";
+  }
+  try { const r = await fetch(CONFIG.storiesUrl); STORIES = (await r.json()).stories || []; } catch (e) { STORIES = []; }
+  // код из ссылки: t.me/<бот>/<app>?startapp=GRANT  или  ?code=GRANT
+  let param = "";
+  try { param = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || new URLSearchParams(location.search).get("tgWebAppStartParam") || new URLSearchParams(location.search).get("code") || ""; } catch (e) {}
+  param = String(param).toUpperCase();
+  render();
+  if (param && MOMENTS.some(m => m.code === param)) { S.tab = "unblur"; render(); setTimeout(() => unblur(param), 450); }
+}
+init();
+})();
+</script>

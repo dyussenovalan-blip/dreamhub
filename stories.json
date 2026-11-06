@@ -1,0 +1,429 @@
+{
+  "_readme": "База историй. Все записи ниже — ДЕМО (demo: true): вымышленные люди для показа прототипа. Перед защитой замените их реальными историями с письменным согласием и поставьте demo: false. Поля role/goal/country/level/fear/time — коды из анкеты (см. matcher.py). public_name_consent: false — на карточке будет pseudonym вместо имени. name_i18n — написание имени на английском и казахском (по желанию).",
+  "stories": [
+    {
+      "id": "s01",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Айгерим",
+      "pseudonym": {
+        "ru": "студентка из Караганды",
+        "en": "a student from Karaganda",
+        "kk": "Қарағандылық студент"
+      },
+      "city": {
+        "ru": "Караганда",
+        "en": "Karaganda",
+        "kk": "Қарағанды"
+      },
+      "role": "student",
+      "goal": "grant",
+      "country": "uk",
+      "level": "intermediate",
+      "fear": "speaking",
+      "time": "6_12",
+      "goal_text": {
+        "ru": "магистратура по гранту",
+        "en": "a master's degree on a scholarship",
+        "kk": "грантпен магистратура"
+      },
+      "now": {
+        "ru": "учится в магистратуре в Великобритании",
+        "en": "doing a master's in the UK",
+        "kk": "Ұлыбританияда магистратурада оқиды"
+      },
+      "fear_text": {
+        "ru": "боялась говорить: казалось, что замолчит посреди ответа",
+        "en": "was afraid of freezing in the middle of a speaking answer",
+        "kk": "жауап ортасында тұрып қаламын деп сөйлеуден қорықты"
+      },
+      "prep": {
+        "ru": "каждый день записывала себя на телефон по минуте и переслушивала",
+        "en": "recorded herself on her phone for a minute every day and listened back",
+        "kk": "күн сайын телефонға бір минут өзін жазып, қайта тыңдады"
+      },
+      "advice": {
+        "ru": "Записывай себя. Сначала стыдно, через неделю — привычно.",
+        "en": "Record yourself. Awkward at first, normal after a week.",
+        "kk": "Өзіңді жазып ал. Алдымен ұят, бір аптадан кейін үйреншікті."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Aigerim",
+        "kk": "Айгерім"
+      }
+    },
+    {
+      "id": "s02",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Данияр",
+      "pseudonym": {
+        "ru": "выпускник школы из Шымкента",
+        "en": "a school graduate from Shymkent",
+        "kk": "Шымкенттік мектеп түлегі"
+      },
+      "city": {
+        "ru": "Шымкент",
+        "en": "Shymkent",
+        "kk": "Шымкент"
+      },
+      "role": "school",
+      "goal": "study",
+      "country": "australia",
+      "level": "intermediate",
+      "fear": "writing",
+      "time": "3_6",
+      "goal_text": {
+        "ru": "бакалавриат за рубежом",
+        "en": "a bachelor's degree abroad",
+        "kk": "шетелде бакалавриат"
+      },
+      "now": {
+        "ru": "учится на первом курсе в Австралии",
+        "en": "in his first year at university in Australia",
+        "kk": "Аустралияда бірінші курста оқиды"
+      },
+      "fear_text": {
+        "ru": "не знал, как уложить эссе во время экзамена",
+        "en": "didn't know how to finish an essay in time",
+        "kk": "эссені уақытында қалай жазып бітіретінін білмеді"
+      },
+      "prep": {
+        "ru": "писал по одному эссе в неделю на время и разбирал ошибки с учителем",
+        "en": "wrote one timed essay a week and went through the mistakes with a teacher",
+        "kk": "аптасына бір эссені уақытпен жазып, қателерін мұғаліммен талдады"
+      },
+      "advice": {
+        "ru": "Пиши на время с первого дня, а не за неделю до экзамена.",
+        "en": "Write against the clock from day one, not the week before the exam.",
+        "kk": "Бірінші күннен уақытпен жаз, емтиханға бір апта қалғанда емес."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Daniyar",
+        "kk": "Данияр"
+      }
+    },
+    {
+      "id": "s03",
+      "demo": true,
+      "public_name_consent": false,
+      "name": "Аружан",
+      "pseudonym": {
+        "ru": "выпускница из Актобе",
+        "en": "a graduate from Aktobe",
+        "kk": "Ақтөбелік түлек"
+      },
+      "city": {
+        "ru": "Актобе",
+        "en": "Aktobe",
+        "kk": "Ақтөбе"
+      },
+      "role": "graduate",
+      "goal": "work",
+      "country": "canada",
+      "level": "advanced",
+      "fear": "listening",
+      "time": "lt3",
+      "goal_text": {
+        "ru": "работа и переезд",
+        "en": "a job and relocation",
+        "kk": "жұмыс және көшу"
+      },
+      "now": {
+        "ru": "работает в Канаде",
+        "en": "working in Canada",
+        "kk": "Канадада жұмыс істейді"
+      },
+      "fear_text": {
+        "ru": "боялась не разобрать акценты в Listening",
+        "en": "worried she wouldn't understand the accents in Listening",
+        "kk": "Listening-тегі акценттерді түсінбей қаламын деп қорықты"
+      },
+      "prep": {
+        "ru": "слушала подкасты с разными акцентами по дороге на работу",
+        "en": "listened to podcasts with different accents on the way to work",
+        "kk": "жұмысқа бара жатып әртүрлі акценттегі подкасттарды тыңдады"
+      },
+      "advice": {
+        "ru": "Слушай английский каждый день, даже по 15 минут.",
+        "en": "Listen to English every day, even for 15 minutes.",
+        "kk": "Ағылшынша күн сайын тыңда, тіпті 15 минут болса да."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Aruzhan",
+        "kk": "Аружан"
+      }
+    },
+    {
+      "id": "s04",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Ерлан",
+      "pseudonym": {
+        "ru": "студент из Павлодара",
+        "en": "a student from Pavlodar",
+        "kk": "Павлодарлық студент"
+      },
+      "city": {
+        "ru": "Павлодар",
+        "en": "Pavlodar",
+        "kk": "Павлодар"
+      },
+      "role": "student",
+      "goal": "study",
+      "country": "europe",
+      "level": "beginner",
+      "fear": "start",
+      "time": "gt12",
+      "goal_text": {
+        "ru": "учёба в Европе",
+        "en": "studying in Europe",
+        "kk": "Еуропада оқу"
+      },
+      "now": {
+        "ru": "учится по обмену в Европе",
+        "en": "on an exchange programme in Europe",
+        "kk": "Еуропада алмасу бағдарламасымен оқиды"
+      },
+      "fear_text": {
+        "ru": "не понимал, с чего вообще начать",
+        "en": "had no idea where to even start",
+        "kk": "неден бастау керегін мүлде түсінбеді"
+      },
+      "prep": {
+        "ru": "начал с базовой грамматики, потом перешёл на пробные тесты раз в месяц",
+        "en": "started with basic grammar, then moved to a practice test once a month",
+        "kk": "негізгі грамматикадан бастап, кейін айына бір рет сынақ тесттерге көшті"
+      },
+      "advice": {
+        "ru": "Не жди, пока будешь готов. Начни с малого сегодня.",
+        "en": "Don't wait until you feel ready. Start small today.",
+        "kk": "Дайын болғанша күтпе. Бүгін кішкентайдан баста."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Yerlan",
+        "kk": "Ерлан"
+      }
+    },
+    {
+      "id": "s05",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Мадина",
+      "pseudonym": {
+        "ru": "школьница из Алматы",
+        "en": "a school student from Almaty",
+        "kk": "Алматылық оқушы"
+      },
+      "city": {
+        "ru": "Алматы",
+        "en": "Almaty",
+        "kk": "Алматы"
+      },
+      "role": "school",
+      "goal": "grant",
+      "country": "usa",
+      "level": "intermediate",
+      "fear": "speaking",
+      "time": "6_12",
+      "goal_text": {
+        "ru": "бакалавриат по стипендии",
+        "en": "a bachelor's on a scholarship",
+        "kk": "стипендиямен бакалавриат"
+      },
+      "now": {
+        "ru": "учится в университете в США",
+        "en": "studying at a university in the USA",
+        "kk": "АҚШ-тағы университетте оқиды"
+      },
+      "fear_text": {
+        "ru": "стеснялась своего акцента",
+        "en": "was shy about her accent",
+        "kk": "акцентінен ұялды"
+      },
+      "prep": {
+        "ru": "раз в неделю созванивалась с подругой и говорили только по-английски",
+        "en": "called a friend once a week and they spoke only English",
+        "kk": "аптасына бір рет құрбысымен хабарласып, тек ағылшынша сөйлесті"
+      },
+      "advice": {
+        "ru": "Акцент — это нормально. Важнее говорить понятно и без пауз.",
+        "en": "An accent is fine. Being clear and fluent matters more.",
+        "kk": "Акцент — қалыпты нәрсе. Түсінікті әрі кідіріссіз сөйлеу маңыздырақ."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Madina",
+        "kk": "Мадина"
+      }
+    },
+    {
+      "id": "s06",
+      "demo": true,
+      "public_name_consent": false,
+      "name": "Тимур",
+      "pseudonym": {
+        "ru": "выпускник из Усть-Каменогорска",
+        "en": "a graduate from Oskemen",
+        "kk": "Өскемендік түлек"
+      },
+      "city": {
+        "ru": "Усть-Каменогорск",
+        "en": "Oskemen",
+        "kk": "Өскемен"
+      },
+      "role": "graduate",
+      "goal": "study",
+      "country": "uk",
+      "level": "advanced",
+      "fear": "writing",
+      "time": "3_6",
+      "goal_text": {
+        "ru": "магистратура",
+        "en": "a master's degree",
+        "kk": "магистратура"
+      },
+      "now": {
+        "ru": "учится в магистратуре в Великобритании",
+        "en": "doing a master's in the UK",
+        "kk": "Ұлыбританияда магистратурада оқиды"
+      },
+      "fear_text": {
+        "ru": "боялся, что не хватит аргументов в эссе",
+        "en": "worried he'd run out of arguments in the essay",
+        "kk": "эссеге дәлел жетпей қалады деп қорықты"
+      },
+      "prep": {
+        "ru": "собирал свою копилку аргументов на частые темы",
+        "en": "built his own bank of arguments for common topics",
+        "kk": "жиі кездесетін тақырыптарға өз дәлелдер қорын жинады"
+      },
+      "advice": {
+        "ru": "Структура важнее сложных слов.",
+        "en": "Structure matters more than fancy words.",
+        "kk": "Күрделі сөздерден гөрі құрылым маңызды."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Timur",
+        "kk": "Тимур"
+      }
+    },
+    {
+      "id": "s07",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Камила",
+      "pseudonym": {
+        "ru": "студентка из Кызылорды",
+        "en": "a student from Kyzylorda",
+        "kk": "Қызылордалық студент"
+      },
+      "city": {
+        "ru": "Кызылорда",
+        "en": "Kyzylorda",
+        "kk": "Қызылорда"
+      },
+      "role": "student",
+      "goal": "grant",
+      "country": "asia",
+      "level": "beginner",
+      "fear": "reading",
+      "time": "6_12",
+      "goal_text": {
+        "ru": "учёба по гранту в Азии",
+        "en": "a scholarship to study in Asia",
+        "kk": "Азияда грантпен оқу"
+      },
+      "now": {
+        "ru": "учится по гранту в Азии",
+        "en": "studying in Asia on a scholarship",
+        "kk": "Азияда грантпен оқиды"
+      },
+      "fear_text": {
+        "ru": "думала, что не успеет прочитать все тексты",
+        "en": "thought she wouldn't manage to read all the texts in time",
+        "kk": "барлық мәтінді оқып үлгермеймін деп ойлады"
+      },
+      "prep": {
+        "ru": "каждый вечер читала одну статью на английском и выписывала новые слова",
+        "en": "read one English article every evening and wrote down new words",
+        "kk": "әр кеш сайын ағылшынша бір мақала оқып, жаңа сөздерді жазып алды"
+      },
+      "advice": {
+        "ru": "Из маленького города тоже можно. Главное — регулярность.",
+        "en": "You can do it from a small town too. Consistency is what counts.",
+        "kk": "Кішкентай қаладан да болады. Ең бастысы — тұрақтылық."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Kamila",
+        "kk": "Камила"
+      }
+    },
+    {
+      "id": "s08",
+      "demo": true,
+      "public_name_consent": true,
+      "name": "Бекзат",
+      "pseudonym": {
+        "ru": "школьник из Туркестана",
+        "en": "a school student from Turkistan",
+        "kk": "Түркістандық оқушы"
+      },
+      "city": {
+        "ru": "Туркестан",
+        "en": "Turkistan",
+        "kk": "Түркістан"
+      },
+      "role": "school",
+      "goal": "study",
+      "country": "europe",
+      "level": "beginner",
+      "fear": "speaking",
+      "time": "gt12",
+      "goal_text": {
+        "ru": "бакалавриат в Европе",
+        "en": "a bachelor's degree in Europe",
+        "kk": "Еуропада бакалавриат"
+      },
+      "now": {
+        "ru": "учится на бакалавриате в Европе",
+        "en": "doing a bachelor's in Europe",
+        "kk": "Еуропада бакалавриатта оқиды"
+      },
+      "fear_text": {
+        "ru": "дома почти не с кем было говорить по-английски",
+        "en": "had almost no one to speak English with at home",
+        "kk": "үйде ағылшынша сөйлесетін адам жоқтың қасы болды"
+      },
+      "prep": {
+        "ru": "разговаривал сам с собой: описывал вслух всё, что делает за день",
+        "en": "talked to himself: described out loud everything he did during the day",
+        "kk": "өзімен-өзі сөйлесті: күні бойы не істегенін дауыстап сипаттады"
+      },
+      "advice": {
+        "ru": "Нет собеседника — говори сам с собой. Это работает.",
+        "en": "No one to talk to? Talk to yourself. It works.",
+        "kk": "Сөйлесетін адам жоқ па? Өзіңмен сөйлес. Бұл жұмыс істейді."
+      },
+      "youtube_url": "",
+      "hidden_clip": "",
+      "name_i18n": {
+        "en": "Bekzat",
+        "kk": "Бекзат"
+      }
+    }
+  ]
+}
